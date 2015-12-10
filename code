@@ -1,0 +1,609 @@
+FemaleTrain<-read.csv(file.choose())
+MaleTrain<-read.csv(file.choose())
+dataHealth<-read.csv(file.choose())
+str(data)
+FemaleTrain<-FemaleTrain[,c(2:10)]
+MaleTrain<-MaleTrain[,c(2:10)]
+
+summary(FemaleTrain)
+summary(MaleTrain)
+summary(dataHealth)
+
+dataHealth$HyperSBP<-ifelse(dataHealth$SBP>120,1,0)
+dataHealth$HyperDBP<-ifelse(dataHealth$DBP>80,1,0)
+
+###################### Possible outliers
+##### present int the original dataset has to be removed 
+
+######################### boxplots
+ggplot(dataHealth,aes(SBP))+geom_boxplot()
+boxplot(dataHealth$SBP, main='SBP Boxplot', ylab='SBP')
+boxplot(dataHealth$DBP,main='DBP Boxplot', ylab='DBP')
+
+#### checking the unnaturally low record
+
+dataHealth[dataHealth$SBP<50,]
+
+### record looks natural but SBP and DBP is unnaturally low maybe some 
+## error in the dataset entry so removing the outlier
+
+
+dataHealth<-dataHealth[!dataHealth$DBP<50,]
+
+
+
+########################################## Histogram of SBP 
+
+ggplot(dataHealth, aes(SBP, fill=Gender))+geom_histogram()+xlab('SYSTOLIC BLOOD PRESSURE')+
+  ylab('NO. OF PEOPLE')+ggtitle('Histogram of SBP')
+sum(dataHealth$Gender=='M' & dataHealth$SBP>120)/NROW(dataHealth[dataHealth$SBP>120,])
+
+########################################## Histogram of DBP
+
+ggplot(dataHealth, aes(DBP, fill=Gender))+geom_histogram()+xlab('DIASTOLIC BLOOD PRESSURE')+
+ ylab('NO. OF PEOPLE')+ggtitle('Histogram of DBP')
+
+sum(dataHealth$Gender=='M' & dataHealth$DBP>80)/NROW(dataHealth[dataHealth$DBP>80,])
+
+########## AGE effect on SBP in males and females  
+ggplot(dataHealth, aes(Age,SBP, color=Gender, shape=Gender, size=10))+geom_point()+xlab('SYSTOLIC BLOOD PRESSURE')+
+  ylab('AGE')
+
+ggplot(dataHealth, aes( Age, SBP,color=Gender, shape=Gender, size=10))+geom_point()+geom_smooth(method=lm)+
+  xlab('AGE')+ylab('SYSTOLIC BLOOD PRESSURE')+ ggtitle('Age vs SBP')
+
+### Correlation between Age and SBP 
+
+cor(dataHealth$Age[dataHealth$Gender=='M'], dataHealth$SBP[dataHealth$Gender=='M'])
+cor(dataHealth$Age[dataHealth$Gender=='F'], dataHealth$SBP[dataHealth$Gender=='F'])
+cor(dataHealth$Age, dataHealth$SBP)
+
+
+########## AGE effect on DBP in males and females
+
+ggplot(dataHealth, aes(Age,DBP, color=Gender, shape=Gender, size=10))+geom_point()+xlab('DIASTOLIC BLOOD PRESSURE')+ylab('AGE')
+
+ggplot(dataHealth, aes(Age, DBP,color=Gender, shape=Gender, size=10))+geom_point()+geom_smooth(method=lm)+ xlab('DIASTOLIC BLOOD PRESSURE')+ylab('AGE')
+
+### Correlation between Age and DBP 
+cor(dataHealth$Age[dataHealth$Gender=='M'], dataHealth$DBP[dataHealth$Gender=='M'])
+cor(dataHealth$Age[dataHealth$Gender=='F'], dataHealth$DBP[dataHealth$Gender=='F'])
+cor( dataHealth$DBP,dataHealth$Age)
+
+######################################################################################
+
+
+dataHealth$HyperSBP<-ifelse(dataHealth$SBP>120,1,0)
+dataHealth$HyperDBP<-ifelse(dataHealth$DBP>80,1,0)
+######## IS.OBESE 
+
+######################################################SBP
+
+ggplot(dataHealth, aes(SBP, fill=Is.Obese))+geom_histogram()+xlab('SYSTOLIC BLOOD PRESSURE')
+
+
+##############How many SBP>120 people are obese
+IsObeseSBP<-sum(dataHealth$Is.Obese=='YES' & dataHealth$SBP>120)/NROW(dataHealth[dataHealth$SBP>120,])*100
+
+###############How many obese are SBP>120
+IsObeseSBPRate<-sum(dataHealth$Is.Obese=='YES' & dataHealth$SBP>120)/NROW(dataHealth[dataHealth$Is.Obese=='YES',])*100
+
+####################
+## % of people who are obese according to gender
+NROW(dataHealth[dataHealth$Is.Obese=='YES' & dataHealth$Gender=='M',])/NROW(dataHealth[dataHealth$Is.Obese=='YES',])
+
+IsObeseSBPRateMale<-sum(dataHealth$Is.Obese=='YES' & dataHealth$SBP>120 & dataHealth$Gender=='M')/NROW(dataHealth[dataHealth$Is.Obese=='YES' & dataHealth$Gender=='M',])*100
+IsObeseSBPRateFemale<-sum(dataHealth$Is.Obese=='YES' & dataHealth$SBP>120 & dataHealth$Gender=='F')/NROW(dataHealth[dataHealth$Is.Obese=='YES' & dataHealth$Gender=='F',])*100
+
+
+ggplot(dataHealth, aes(Is.Obese))+geom_bar(aes(fill=factor(HyperSBP)))+ggtitle('Obesity Bar graph ')
+ggplot(dataHealth, aes(Is.Obese))+geom_histogram(aes(fill=factor(HyperSBP)))+facet_wrap(~Gender)+
+  ggtitle('Obesity Bar Graph with male and female seperated')
+
+
+#############################################################DBP
+ggplot(dataHealth, aes(DBP, fill=Is.Obese))+geom_histogram()+xlab('DIASTOLIC BLOOD PRESSURE')
+
+##############How many DBP>80 people are obese
+IsObeseDBP<-sum(dataHealth$Is.Obese=='YES' & dataHealth$DBP>80)/NROW(dataHealth[dataHealth$DBP>80,])*100
+
+###############How many obese are DBP>80
+IsObeseDBPRate<-sum(dataHealth$Is.Obese=='YES' & dataHealth$DBP>80)/NROW(dataHealth[dataHealth$Is.Obese=='YES',])*100
+####################
+
+
+IsObeseDBPRateMale<-sum(dataHealth$Is.Obese=='YES' & dataHealth$DBP>80 & dataHealth$Gender=='M')/NROW(dataHealth[dataHealth$Is.Obese=='YES' & dataHealth$Gender=='M',])*100
+IsObeseDBPRateFemale<-sum(dataHealth$Is.Obese=='YES' & dataHealth$DBP>80 & dataHealth$Gender=='F')/NROW(dataHealth[dataHealth$Is.Obese=='YES' & dataHealth$Gender=='F',])*100
+
+
+ggplot(dataHealth, aes(Is.Obese))+geom_bar(aes(fill=factor(HyperDBP)))+ggtitle('Obesity Bar graph DBP')
+ggplot(dataHealth, aes(Is.Obese))+geom_histogram(aes(fill=factor(HyperDBP)))+facet_wrap(~Gender)+
+  ggtitle('Obesity Bar Graph with male and female seperated DBP')
+
+
+
+
+######################################################
+
+##################################################################
+
+########## bmi on SBP
+
+## SBP
+ggplot(dataHealth, aes(bmi,SBP,color=Gender, size=10))+geom_point()+geom_smooth()+
+  ggtitle('BMI vs SBP')
+
+### Correlation between bmi and SBP 
+
+
+cor(dataHealth$bmi[dataHealth$Gender=='M'], dataHealth$SBP[dataHealth$Gender=='M'])
+cor(dataHealth$bmi[dataHealth$Gender=='F'], dataHealth$SBP[dataHealth$Gender=='F'])
+cor(dataHealth$bmi, dataHealth$SBP)
+
+
+#### checking the histogram of SBP>120 
+ggplot(dataHealth, aes(bmi))+geom_histogram(aes(fill=factor(HyperSBP)))+
+  ggtitle('BMI vs SBP')
+
+##getting the average bmi when SBP>120
+averageBmiforSbpabove<-sum(dataHealth$bmi[dataHealth$HyperSBP==1])/NROW(dataHealth$bmi[dataHealth$HyperSBP==1])
+averageBmiforSbpaboveMale<-sum(dataHealth$bmi[dataHealth$HyperSBP==1 & dataHealth$Gender=='M'])/NROW(dataHealth$bmi[dataHealth$HyperSBP==1 & dataHealth$Gender=='M'])
+averageBmiforSbpaboveFeMale<-sum(dataHealth$bmi[dataHealth$HyperSBP==1 & dataHealth$Gender=='F'])/NROW(dataHealth$bmi[dataHealth$HyperSBP==1 & dataHealth$Gender=='F'])
+
+BmiRate<-sum(dataHealth$HyperSBP==1 & dataHealth$bmi>24.9)/NROW(dataHealth[dataHealth$bmi>24.9,])
+BmiRateMale<-sum(dataHealth$HyperSBP==1 & dataHealth$bmi>24.9 & dataHealth$Gender=='M')/NROW(dataHealth[dataHealth$bmi>24.9 & dataHealth$Gender=='M',])
+BmiRateFeMale<-sum(dataHealth$HyperSBP==1 & dataHealth$bmi>24.9 & dataHealth$Gender=='F')/NROW(dataHealth[dataHealth$bmi>24.9 & dataHealth$Gender=='F',])
+
+########## DBP in males and females
+
+ggplot(dataHealth, aes(bmi,DBP,color=Gender, size=10))+geom_point()+geom_smooth()+ggtitle('BMI vs DBP')
+
+### Correlation between Age and DBP 
+cor(dataHealth$bmi[dataHealth$Gender=='M'], dataHealth$DBP[dataHealth$Gender=='M'])
+cor(dataHealth$bmi[dataHealth$Gender=='F'], dataHealth$DBP[dataHealth$Gender=='F'])
+cor(dataHealth$bmi, dataHealth$DBP)
+
+
+#### checking the histogram of DBP>80 
+ggplot(dataHealth, aes(bmi))+geom_histogram(aes(fill=factor(HyperDBP)))+ggtitle('bmi histogram DBP')
+
+##getting the average bmi when DBP>80
+averageBmiforDbpabove<-sum(dataHealth$bmi[dataHealth$HyperDBP==1])/NROW(dataHealth$bmi[dataHealth$HyperDBP==1])
+averageBmiforDbpaboveMale<-sum(dataHealth$bmi[dataHealth$HyperDBP==1 & dataHealth$Gender=='M'])/NROW(dataHealth$bmi[dataHealth$HyperDBP==1 & dataHealth$Gender=='M'])
+averageBmiforDbpaboveFeMale<-sum(dataHealth$bmi[dataHealth$HyperDBP==1 & dataHealth$Gender=='F'])/NROW(dataHealth$bmi[dataHealth$HyperDBP==1 & dataHealth$Gender=='F'])
+
+BmiRateDBP<-sum(dataHealth$HyperDBP==1 & dataHealth$bmi>24.9)/NROW(dataHealth[dataHealth$bmi>24.9,])
+BmiRateMaleDBP<-sum(dataHealth$HyperDBP==1 & dataHealth$bmi>24.9 & dataHealth$Gender=='M')/NROW(dataHealth[dataHealth$bmi>24.9 & dataHealth$Gender=='M',])
+BmiRateFeMaleDBP<-sum(dataHealth$HyperDBP==1 & dataHealth$bmi>24.9 & dataHealth$Gender=='F')/NROW(dataHealth[dataHealth$bmi>24.9 & dataHealth$Gender=='F',])
+
+
+
+######################################################################################
+
+##################################################################
+
+##########        Waist Circumfrence
+
+## SBP
+ggplot(dataHealth, aes(wc,SBP,color=Gender, size=10))+geom_point()+geom_smooth()+ggtitle('SBP vs WC')
+
+### Correlation between wc and SBP 
+
+
+cor(dataHealth$wc[dataHealth$Gender=='M'], dataHealth$SBP[dataHealth$Gender=='M'])
+cor(dataHealth$wc[dataHealth$Gender=='F'], dataHealth$SBP[dataHealth$Gender=='F'])
+cor(dataHealth$wc, dataHealth$SBP)
+
+#### checking the histogram of SBP>120 
+ggplot(dataHealth, aes(wc))+geom_histogram(aes(fill=factor(HyperSBP)))+ggtitle('Waist Circumfrence histogram')
+
+##getting the average bmi when SBP>120
+averageWcforSbpabove<-sum(dataHealth$wc[dataHealth$HyperSBP==1])/NROW(dataHealth$wc[dataHealth$HyperSBP==1])
+averageWcforSbpaboveMale<-sum(dataHealth$wc[dataHealth$HyperSBP==1 & dataHealth$Gender=='M'])/NROW(dataHealth$wc[dataHealth$HyperSBP==1 & dataHealth$Gender=='M'])
+averageWcforSbpaboveFeMale<-sum(dataHealth$wc[dataHealth$HyperSBP==1 & dataHealth$Gender=='F'])/NROW(dataHealth$wc[dataHealth$HyperSBP==1 & dataHealth$Gender=='F'])
+
+########## DBP 
+
+ggplot(dataHealth, aes(wc,DBP,color=Gender, size=10))+geom_point()+geom_smooth()+ggtitle('DBP vs WC')
+
+### Correlation between Age and DBP 
+cor(dataHealth$wc[dataHealth$Gender=='M'], dataHealth$DBP[dataHealth$Gender=='M'])
+cor(dataHealth$wc[dataHealth$Gender=='F'], dataHealth$DBP[dataHealth$Gender=='F'])
+cor(dataHealth$wc, dataHealth$DBP)
+
+#### checking the histogram of DBP>80 
+ggplot(dataHealth, aes(wc))+geom_histogram(aes(fill=factor(HyperDBP)))+ggtitle('Histogram WC')
+
+##getting the average bmi when DBP>80
+averageWcforDbpabove<-sum(dataHealth$wc[dataHealth$HyperDBP==1])/NROW(dataHealth$wc[dataHealth$HyperDBP==1])
+averageWcforDbpaboveMale<-sum(dataHealth$wc[dataHealth$HyperDBP==1 & dataHealth$Gender=='M'])/NROW(dataHealth$wc[dataHealth$HyperDBP==1 & dataHealth$Gender=='M'])
+averageWcforDbpaboveFeMale<-sum(dataHealth$wc[dataHealth$HyperDBP==1 & dataHealth$Gender=='F'])/NROW(dataHealth$wc[dataHealth$HyperDBP==1 & dataHealth$Gender=='F'])
+
+
+######################################################################################
+
+
+######################################################################################
+
+##################################################################
+
+##########        Hip Circumfrence
+
+## SBP
+ggplot(dataHealth, aes(hc,SBP,color=Gender, size=10))+geom_point()+geom_smooth()+ggtitle('Hip Circumference')
+
+### Correlation between hc and SBP 
+
+
+cor(dataHealth$hc[dataHealth$Gender=='M'], dataHealth$SBP[dataHealth$Gender=='M'])
+cor(dataHealth$hc[dataHealth$Gender=='F'], dataHealth$SBP[dataHealth$Gender=='F'])
+cor(dataHealth$hc, dataHealth$SBP)
+
+#### checking the histogram of SBP>120 
+ggplot(dataHealth, aes(hc))+geom_histogram(aes(fill=factor(HyperSBP)))+ggtitle('Histogram Hip Circumference')
+
+##getting the average hc when SBP>120
+averageHcforSbpabove<-sum(dataHealth$hc[dataHealth$HyperSBP==1])/NROW(dataHealth$hc[dataHealth$HyperSBP==1])
+averageHcforSbpaboveMale<-sum(dataHealth$hc[dataHealth$HyperSBP==1 & dataHealth$Gender=='M'])/NROW(dataHealth$hc[dataHealth$HyperSBP==1 & dataHealth$Gender=='M'])
+averageHcforSbpaboveFeMale<-sum(dataHealth$hc[dataHealth$HyperSBP==1 & dataHealth$Gender=='F'])/NROW(dataHealth$hc[dataHealth$HyperSBP==1 & dataHealth$Gender=='F'])
+
+########## DBP 
+
+ggplot(dataHealth, aes(hc,DBP,color=Gender, size=10))+geom_point()+geom_smooth()+ggtitle('Hip Circumference')
+
+### Correlation between HC and DBP 
+cor(dataHealth$hc[dataHealth$Gender=='M'], dataHealth$DBP[dataHealth$Gender=='M'])
+cor(dataHealth$hc[dataHealth$Gender=='F'], dataHealth$DBP[dataHealth$Gender=='F'])
+cor(dataHealth$hc, dataHealth$DBP)
+
+#### checking the histogram of DBP>80 
+ggplot(dataHealth, aes(hc))+geom_histogram(aes(fill=factor(HyperDBP)))+ggtitle('Hip circumference Histogram DBP')
+
+##getting the average hc when DBP>80
+averageHcforDbpabove<-sum(dataHealth$hc[dataHealth$HyperDBP==1])/NROW(dataHealth$hc[dataHealth$HyperDBP==1])
+averageHcforDbpaboveMale<-sum(dataHealth$hc[dataHealth$HyperDBP==1 & dataHealth$Gender=='M'])/NROW(dataHealth$hc[dataHealth$HyperDBP==1 & dataHealth$Gender=='M'])
+averageHcforDbpaboveFeMale<-sum(dataHealth$hc[dataHealth$HyperDBP==1 & dataHealth$Gender=='F'])/NROW(dataHealth$hc[dataHealth$HyperDBP==1 & dataHealth$Gender=='F'])
+
+
+######################################################################################
+
+############### Wiast to Hip Ratio circumfrence
+
+## SBP
+ggplot(dataHealth, aes(whr,SBP,color=Gender, size=10))+geom_point()+geom_smooth()+ggtitle('Waist To Hip ratio')
+
+### Correlation between WHR and SBP 
+
+
+cor(dataHealth$whr[dataHealth$Gender=='M'], dataHealth$SBP[dataHealth$Gender=='M'])
+cor(dataHealth$whr[dataHealth$Gender=='F'], dataHealth$SBP[dataHealth$Gender=='F'])
+cor(dataHealth$whr, dataHealth$SBP)
+
+#### checking the histogram of SBP>120 
+ggplot(dataHealth, aes(whr))+geom_histogram(aes(fill=factor(HyperSBP)))+ggtitle('Waist to Hip ratio')
+
+##getting the average whr when SBP>120
+averageWhrforSbpabove<-sum(dataHealth$whr[dataHealth$HyperSBP==1])/NROW(dataHealth$whr[dataHealth$HyperSBP==1])
+averageWhrforSbpaboveMale<-sum(dataHealth$whr[dataHealth$HyperSBP==1 & dataHealth$Gender=='M'])/NROW(dataHealth$whr[dataHealth$HyperSBP==1 & dataHealth$Gender=='M'])
+averageWhrforSbpaboveFeMale<-sum(dataHealth$whr[dataHealth$HyperSBP==1 & dataHealth$Gender=='F'])/NROW(dataHealth$whr[dataHealth$HyperSBP==1 & dataHealth$Gender=='F'])
+
+whrRateSBP<-sum(dataHealth$HyperSBP==1 & dataHealth$wc>0.8)/NROW(dataHealth[dataHealth$wc>0.8,])
+whrRateMaleSBP<-sum(dataHealth$HyperSBP==1 & dataHealth$wc>0.95 & dataHealth$Gender=='M')/NROW(dataHealth[dataHealth$wc>0.95 & dataHealth$Gender=='M',])
+whrRateFeMaleSBP<-sum(dataHealth$HyperSBP==1 & dataHealth$wc>0.8 & dataHealth$Gender=='F')/NROW(dataHealth[dataHealth$wc>0.8 & dataHealth$Gender=='F',])
+
+
+########## DBP 
+
+ggplot(dataHealth, aes(whr,DBP,color=Gender, size=10))+geom_point()+geom_smooth()+ggtitle('Whr vs SBP')
+
+### Correlation between WHR and DBP 
+cor(dataHealth$whr[dataHealth$Gender=='M'], dataHealth$DBP[dataHealth$Gender=='M'])
+cor(dataHealth$whr[dataHealth$Gender=='F'], dataHealth$DBP[dataHealth$Gender=='F'])
+cor(dataHealth$whr, dataHealth$DBP)
+
+#### checking the histogram of DBP>80 
+ggplot(dataHealth, aes(whr))+geom_histogram(aes(fill=factor(HyperDBP)))+ggtitle('WHR Histogram DBP')
+
+##getting the average whr when DBP>80
+averagewhrforDbpabove<-sum(dataHealth$whr[dataHealth$HyperDBP==1])/NROW(dataHealth$whr[dataHealth$HyperDBP==1])
+averageWhrforDbpaboveMale<-sum(dataHealth$whr[dataHealth$HyperDBP==1 & dataHealth$Gender=='M'])/NROW(dataHealth$whr[dataHealth$HyperDBP==1 & dataHealth$Gender=='M'])
+averageWhrforDbpaboveFeMale<-sum(dataHealth$whr[dataHealth$HyperDBP==1 & dataHealth$Gender=='F'])/NROW(dataHealth$whr[dataHealth$HyperDBP==1 & dataHealth$Gender=='F'])
+
+whrRateDBP<-sum(dataHealth$HyperDBP==1 & dataHealth$wc>0.8)/NROW(dataHealth[dataHealth$wc>0.8,])
+whrRateMaleDBP<-sum(dataHealth$HyperDBP==1 & dataHealth$wc>0.95 & dataHealth$Gender=='M')/NROW(dataHealth[dataHealth$wc>0.95 & dataHealth$Gender=='M',])
+whrRateFeMaleDBP<-sum(dataHealth$HyperDBP==1 & dataHealth$wc>0.8 & dataHealth$Gender=='F')/NROW(dataHealth[dataHealth$wc>0.8 & dataHealth$Gender=='F',])
+
+######################################################################################
+
+## T test on the whole dataset
+
+t.test(dataHealth$Age[dataHealth$HyperSBP==1], dataHealth$Age[dataHealth$HyperSBP==0])
+### not statistically significant
+
+t.test(dataHealth$Age[dataHealth$HyperDBP==1], dataHealth$Age[dataHealth$HyperDBP==0])
+#### statistically significant
+
+
+t.test(dataHealth$bmi[dataHealth$HyperSBP==1], dataHealth$bmi[dataHealth$HyperSBP==0])
+### statistically significant
+t.test(dataHealth$bmi[dataHealth$HyperDBP==1], dataHealth$bmi[dataHealth$HyperDBP==0])
+#####statistically significant
+
+t.test(dataHealth$wc[dataHealth$HyperSBP==1], dataHealth$wc[dataHealth$HyperSBP==0])
+#####statistically significant
+t.test(dataHealth$wc[dataHealth$HyperDBP==1], dataHealth$wc[dataHealth$HyperDBP==0])
+#####statistically significant
+
+t.test(dataHealth$hc[dataHealth$HyperSBP==1], dataHealth$hc[dataHealth$HyperSBP==0])
+###statistically significant
+t.test(dataHealth$hc[dataHealth$HyperDBP==1], dataHealth$hc[dataHealth$HyperDBP==0])
+###statistically significant
+
+t.test(dataHealth$whr[dataHealth$HyperSBP==1], dataHealth$whr[dataHealth$HyperSBP==0])
+###statistically significant
+t.test(dataHealth$whr[dataHealth$HyperDBP==1], dataHealth$whr[dataHealth$HyperDBP==0])
+###statistically significant
+
+#######################################################################################
+
+
+########## T test based on  male and female
+
+
+######################## Age
+###SBP
+
+t.test(dataHealth$Age[dataHealth$HyperSBP==1 & dataHealth$Gender=='M']
+       , dataHealth$Age[dataHealth$HyperSBP==0 & dataHealth$Gender=='M'])
+
+##not significant
+
+t.test(dataHealth$Age[dataHealth$HyperSBP==1 & dataHealth$Gender=='F']
+       , dataHealth$Age[dataHealth$HyperSBP==0 & dataHealth$Gender=='F'])
+###not significant
+
+###DBP
+
+t.test(dataHealth$Age[dataHealth$HyperDBP==1 & dataHealth$Gender=='M']
+       , dataHealth$Age[dataHealth$HyperDBP==0 & dataHealth$Gender=='M'])
+###significant
+
+t.test(dataHealth$Age[dataHealth$HyperDBP==1 & dataHealth$Gender=='F']
+       , dataHealth$Age[dataHealth$HyperDBP==0 & dataHealth$Gender=='F'])
+###not significant
+
+######################## bmi
+###SBP
+
+t.test(dataHealth$bmi[dataHealth$HyperSBP==1 & dataHealth$Gender=='M']
+       , dataHealth$bmi[dataHealth$HyperSBP==0 & dataHealth$Gender=='M'])
+####statistically significant
+
+t.test(dataHealth$bmi[dataHealth$HyperSBP==1 & dataHealth$Gender=='F']
+       , dataHealth$bmi[dataHealth$HyperSBP==0 & dataHealth$Gender=='F'])
+####statistically significant
+
+###DBP
+
+t.test(dataHealth$bmi[dataHealth$HyperDBP==1 & dataHealth$Gender=='M']
+       , dataHealth$bmi[dataHealth$HyperDBP==0 & dataHealth$Gender=='M'])
+####statistically significant
+
+t.test(dataHealth$bmi[dataHealth$HyperDBP==1 & dataHealth$Gender=='F']
+       , dataHealth$bmi[dataHealth$HyperDBP==0 & dataHealth$Gender=='F'])
+####statistically significant
+
+
+######################## wc
+###SBP
+
+t.test(dataHealth$wc[dataHealth$HyperSBP==1 & dataHealth$Gender=='M']
+       , dataHealth$wc[dataHealth$HyperSBP==0 & dataHealth$Gender=='M'])
+####statistically significant
+
+t.test(dataHealth$wc[dataHealth$HyperSBP==1 & dataHealth$Gender=='F']
+       , dataHealth$wc[dataHealth$HyperSBP==0 & dataHealth$Gender=='F'])
+####statistically significant
+
+###DBP
+
+t.test(dataHealth$wc[dataHealth$HyperDBP==1 & dataHealth$Gender=='M']
+       , dataHealth$wc[dataHealth$HyperDBP==0 & dataHealth$Gender=='M'])
+#########significant
+
+t.test(dataHealth$wc[dataHealth$HyperDBP==1 & dataHealth$Gender=='F']
+       , dataHealth$wc[dataHealth$HyperDBP==0 & dataHealth$Gender=='F'])
+#### not significant
+
+######################## Hip
+###SBP
+
+t.test(dataHealth$hc[dataHealth$HyperSBP==1 & dataHealth$Gender=='M']
+       , dataHealth$hc[dataHealth$HyperSBP==0 & dataHealth$Gender=='M'])
+###statistically significant
+
+t.test(dataHealth$hc[dataHealth$HyperSBP==1 & dataHealth$Gender=='F']
+       , dataHealth$hc[dataHealth$HyperSBP==0 & dataHealth$Gender=='F'])
+###not significant
+
+###DBP
+
+t.test(dataHealth$hc[dataHealth$HyperDBP==1 & dataHealth$Gender=='M']
+       , dataHealth$hc[dataHealth$HyperDBP==0 & dataHealth$Gender=='M'])
+####extremely significant
+
+t.test(dataHealth$hc[dataHealth$HyperDBP==1 & dataHealth$Gender=='F']
+       , dataHealth$hc[dataHealth$HyperDBP==0 & dataHealth$Gender=='F'])
+
+### significant
+
+  
+######################## Waist to hip ratio
+###SBP
+
+t.test(dataHealth$whr[dataHealth$HyperSBP==1 & dataHealth$Gender=='M']
+       , dataHealth$whr[dataHealth$HyperSBP==0 & dataHealth$Gender=='M'])
+###not significant
+
+t.test(dataHealth$whr[dataHealth$HyperSBP==1 & dataHealth$Gender=='F']
+       , dataHealth$whr[dataHealth$HyperSBP==0 & dataHealth$Gender=='F'])
+####significant
+###DBP
+
+t.test(dataHealth$whr[dataHealth$HyperDBP==1 & dataHealth$Gender=='M']
+       , dataHealth$whr[dataHealth$HyperDBP==0 & dataHealth$Gender=='M'])
+###not significant
+
+
+t.test(dataHealth$whr[dataHealth$HyperDBP==1 & dataHealth$Gender=='F']
+       , dataHealth$whr[dataHealth$HyperDBP==0 & dataHealth$Gender=='F'])
+
+###not significant
+
+
+
+#############################################################################################
+##############################################################################################
+
+########### Testing the model DBP
+
+dH<-dataHealth
+dH$HyperSBP<-factor(dH$HyperSBP)
+dH$Gender<-factor(dH$Gender)
+dH$HyperDBP<-factor(dH$HyperDBP)
+
+##### splitting
+set.seed(1234)
+
+setsD<-createDataPartition(dH$HyperDBP,p=0.70,list=F)
+
+############## split into train
+trainD<-dH[setsD,]
+
+############# test
+testD<-dH[-setsD,]
+
+#####################
+set.seed(1234)
+
+sets1D<-createDataPartition(testD$HyperDBP,p=0.50,list=F)
+
+validationD<-testD[sets1D,]
+testingD<-testD[-sets1D,]
+
+
+################################ 1st model
+fitD1<-glm(HyperDBP~Age+Is.Obese+bmi+wc+hc+whr+Gender,data=trainD,family='binomial')
+prD1<-predict(fitD1,validationD[,c(1:6,10)],type='response')
+prD1<-ifelse(prD1>=0.5,1,0)
+ErrorD1<-1-sum(prD1==validationD$HyperDBP)/length(validationD$HyperDBP)
+
+prDT<-predict(fitD1,testD[,c(1:6,10)],type='response')
+prDT<-ifelse(prDT>=0.5,1,0)
+ErrorDT<-1-sum(prDT==testD$HyperDBP)/length(testD$HyperDBP)
+################################ 2nd model
+
+tControl2<-trainControl(method="repeatedCV",repeats=5)
+fit2D <- train(HyperDBP~Is.Obese+bmi+wc+hc+Gender,          
+             data      = trainD,
+             method    = "glm"    ,
+             family    = binomial ,
+             trControl = tControl2
+)
+
+pr2<-NULL
+pr2D<-predict(fit2D,validationD[,c(2,3:5,10)])
+Error2D<-1-sum(pr2D==validationD$HyperDBP)/length(validationD$HyperDBP)
+Error2D
+
+fitD2<-glm(HyperDBP~Age+bmi+wc+hc+whr+Gender,data=trainD,family='binomial')
+prD2<-predict(fitD2,validationD[,c(1,3:6,10)],type='response')
+prD2<-ifelse(prD2>=0.5,1,0)
+ErrorD2<-1-sum(prD2==validationD$HyperDBP)/length(validationD$HyperDBP)
+
+################################ 3rd model
+
+tControl3<-trainControl(method="repeatedCV",repeats=5)
+fit3D <- train(HyperSBP~bmi+Gender,          
+              data      = trainD,
+              method    = "glm"    ,
+              family    = binomial ,
+              trControl = tControl
+)
+
+
+
+pr3D<-predict(fit3D,validationD[,c(3,10)])
+  Error3D<-1-sum(pr3D==validationD$HyperDBP)/length(validationD$HyperDBP)
+Error3D
+
+fitD3<-glm(HyperDBP~bmi+Gender,data=trainD,family='binomial')
+prD3<-predict(fitD3,validationD[,c(3,10)],type='response')
+prD3<-ifelse(prD3>=0.5,1,0)
+ErrorD3<-1-sum(prD3==validationD$HyperDBP)/length(validationD$HyperDBP)
+
+######################################################
+
+########### Testing the model
+
+dH<-dataHealth
+dH$HyperSBP<-factor(dH$HyperSBP)
+dH$Gender<-factor(dH$Gender)
+
+##### splitting
+set.seed(1234)
+
+sets<-createDataPartition(dH$HyperSBP,p=0.70,list=F)
+
+############## split into train
+train<-dH[sets,]
+
+############# test
+test<-dH[-sets,]
+
+#####################
+set.seed(1234)
+
+sets1<-createDataPartition(test$HyperSBP,p=0.50,list=F)
+
+validation<-test[sets1,]
+testing<-test[-sets1,]
+
+
+################################ 1st model
+
+fitS<-glm(HyperSBP~Age+Is.Obese+bmi+wc+hc+whr+Gender,data=train,family='binomial')
+prS<-predict(fitS,validation[,c(1:6,10)],type='response')
+prS<-ifelse(prS>=0.5,1,0)
+ErrorS<-1-sum(prS==validation$HyperSBP)/length(validation$HyperSBP)
+
+
+################################ 2nd model
+
+
+fitS1<-glm(HyperSBP~Is.Obese+bmi+wc+hc+whr+Gender,data=train,family='binomial')
+prS1<-predict(fitS1,validation[,c(2:6,10)],type='response')
+prS1<-ifelse(prS1>=0.5,1,0)
+ErrorS1<-1-sum(prS1==validation$HyperSBP)/length(validation$HyperSBP)
+
+################################ 3rd model
+
+
+
+fitS2<-glm(HyperSBP~bmi+Gender,data=train,family='binomial')
+prS2<-predict(fitS2,validation[,c(3,10)],type='response')
+prS2<-ifelse(prS2>=0.5,1,0)
+ErrorS2<-1-sum(prS2==validation$HyperSBP)/length(validation$HyperSBP)
+
+prT<-predict(fitS2,testing[,c(3,10)],type='response')
+prT<-ifelse(prT>=0.5,1,0)
+ErrorT<-1-sum(prT==testing$HyperSBP)/length(testing$HyperSBP)
+######################################################
+
+
+
+
+
+
+
+############################################################################################
